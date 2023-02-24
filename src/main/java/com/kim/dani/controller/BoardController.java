@@ -1,6 +1,7 @@
 package com.kim.dani.controller;
 
 
+import com.kim.dani.dto.BoardUploadDto;
 import com.kim.dani.dto.HomeDto;
 import com.kim.dani.service.BoardService;
 import lombok.NoArgsConstructor;
@@ -28,27 +29,29 @@ public class BoardController {
     private final BoardService boardService;
 
 
-
+    //local Post Upload
     @PostMapping("/upload")
-    public ResponseEntity postUpload(@RequestParam("file") MultipartFile file,@RequestParam("title") String title, @RequestParam("content") String content, HttpServletRequest req) throws IOException {
-        boolean upload = boardService.postUpload(file, title, content,req);
+    public ResponseEntity Upload(@RequestParam("file") MultipartFile file,
+                                 @RequestParam("title") String title,
+                                 @RequestParam("content") String content,
+                                 HttpServletRequest req) throws IOException {
+        boolean upload = boardService.Upload(file, title, content,req);
         if (upload){
             return new ResponseEntity("success", HttpStatus.OK);
         }
-        return new ResponseEntity("falied", HttpStatus.BAD_REQUEST);
+        return new ResponseEntity("failed", HttpStatus.BAD_REQUEST);
     }
 
+
+    //local Post Upload Test
     @PostMapping("/uploadtest")
-    public ResponseEntity postUploadTest(@RequestParam("file") MultipartFile file,@RequestParam("title") String title, @RequestParam("content") String content, HttpServletRequest req) throws IOException {
-        UUID uuid= UUID.randomUUID();
-        String lastPath = "C:/file/"+uuid+file.getOriginalFilename();
-        Path path = Paths.get(lastPath);
-        file.transferTo(path);
-        return new ResponseEntity("falied", HttpStatus.BAD_REQUEST);
+    public ResponseEntity postUploadTest(@RequestParam("file") MultipartFile file) throws IOException {
+       String name = file.getOriginalFilename();
+       return new ResponseEntity(name, HttpStatus.BAD_REQUEST);
     }
 
 
-
+    //Return Post Paht
     @GetMapping("/home")
     public ResponseEntity home(HttpServletRequest req){
         List<HomeDto> homeDtos = boardService.getBoard(req);
@@ -58,6 +61,29 @@ public class BoardController {
         return new ResponseEntity(HttpStatus.NOT_FOUND);
     }
 
+    //S3 Photo Upload Test
+    @PostMapping("/PhotoUpload")
+    public ResponseEntity photoUploadTest (@RequestParam("file") MultipartFile file,
+                                           @RequestParam("title") String title,
+                                           @RequestParam("content") String content,
+                                           HttpServletRequest req){
 
+        String path = boardService.photoUpload(file);
+        return  new ResponseEntity(path,HttpStatus.OK);
+    }
+
+
+    //S3 Post Upload
+    @PostMapping("/PostUpload")
+    public ResponseEntity postUpload (@RequestParam("file") MultipartFile file,
+                                      @RequestParam("title") String title,
+                                      @RequestParam("content") String content,
+                                      HttpServletRequest req){
+        boolean post = boardService.postUpload(file,title,content,req);
+        if (post){
+            return new ResponseEntity("success", HttpStatus.OK);
+        }
+        return new ResponseEntity("failed", HttpStatus.BAD_REQUEST);
+    }
 
 }
