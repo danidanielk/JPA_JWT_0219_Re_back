@@ -16,7 +16,7 @@ public class Member {
 
     private String name;
 
-    private int age;
+    private Long age;
 
     @ManyToOne
     @JoinColumn(name = "department_id")

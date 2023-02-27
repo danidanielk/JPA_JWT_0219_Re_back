@@ -68,9 +68,7 @@ private String key;
     }
 
 
-
-
-    @GetMapping("/test1")
+    @GetMapping("/test")
     public String test1() {
   return key;
 

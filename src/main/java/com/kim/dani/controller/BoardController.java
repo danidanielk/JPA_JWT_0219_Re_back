@@ -55,10 +55,10 @@ public class BoardController {
     @GetMapping("/home")
     public ResponseEntity home(HttpServletRequest req){
         List<HomeDto> homeDtos = boardService.getBoard(req);
-        if (homeDtos != null){
+//        if (homeDtos != null){
             return new ResponseEntity(homeDtos,HttpStatus.OK);
-        }
-        return new ResponseEntity(HttpStatus.NOT_FOUND);
+//        }
+//        return new ResponseEntity("어디서난 에러지",HttpStatus.CONFLICT);
     }
 
     //S3 Photo Upload Test
@@ -85,5 +85,9 @@ public class BoardController {
         }
         return new ResponseEntity("failed", HttpStatus.BAD_REQUEST);
     }
+
+
+
+
 
 }

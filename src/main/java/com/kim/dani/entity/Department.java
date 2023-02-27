@@ -18,12 +18,8 @@ public class Department {
 
     private String name;
 
-
-
-
-
 //
-//    @OneToMany (mappedBy = "department", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<Member> members = new ArrayList<>();
+    @OneToMany (mappedBy = "department", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Member> members = new ArrayList<>();
 
 }
