@@ -32,6 +32,9 @@ public class Users {
     private String profile;
 
     @Column(nullable = true)
+    private String introduce;
+
+    @Column(nullable = true)
     private String nickname;
 
     @OneToMany(mappedBy = "users" , cascade = CascadeType.ALL,orphanRemoval = true)

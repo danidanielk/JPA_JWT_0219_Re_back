@@ -2,7 +2,8 @@ package com.kim.dani.service;
 
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.kim.dani.dto.BoardUploadDto;
+import com.kim.dani.dto.GetAllBoardDto;
+import com.kim.dani.dto.GetPostDto;
 import com.kim.dani.dto.HomeDto;
 import com.kim.dani.entity.Board;
 import com.kim.dani.entity.Users;
@@ -10,9 +11,8 @@ import com.kim.dani.jwt.JwtTokenValidator;
 import com.kim.dani.repository.BoardRepository;
 import com.kim.dani.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,10 +22,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class BoardService {
 
 
@@ -65,6 +67,8 @@ public class BoardService {
         return false;
     }
 
+
+
     public List<HomeDto> getBoard(HttpServletRequest req){
         String userEmail = jwtTokenValidator.jwtGetUserEmail(req);
         if (userEmail !=null){
@@ -73,6 +77,8 @@ public class BoardService {
             for (Board board : boards) {
                if(board.getUsers().getEmail().equals(userEmail)){
                   HomeDto homeDto= new HomeDto();
+                        homeDto.setUserid(board.getUsers().getId());
+                        homeDto.setBoardid(board.getId());
                        homeDto.setPhoto(board.getPhoto());
                        homeDto.setName(board.getUsers().getName());
                        homeDto.setProfile(board.getUsers().getProfile());
@@ -112,6 +118,7 @@ public class BoardService {
     }
 
 
+
     public boolean postUpload(MultipartFile file,String title,String content,HttpServletRequest req){
 
         String email = jwtTokenValidator.jwtGetUserEmail(req);
@@ -130,5 +137,40 @@ public class BoardService {
         return false;
     }
 
+
+
+    public List<GetAllBoardDto> getAllBoard(){
+        List<Board> board = boardRepository.findAll();
+        if (board !=null) {
+            List<GetAllBoardDto> getAllBoardDtos = new ArrayList<>();
+            for (Board boards : board) {
+                GetAllBoardDto getAllBoardDto = new GetAllBoardDto();
+                getAllBoardDto.setPhoto(boards.getPhoto());
+                getAllBoardDto.setBoardId(boards.getId());
+                getAllBoardDto.setUserId(boards.getUsers().getId());
+                getAllBoardDtos.add(getAllBoardDto);
+            }
+            return getAllBoardDtos;
+        }
+        return null;
+        }
+
+    public List<GetPostDto> getPost(Long userId,Long boardId){
+        Optional<Users> user = usersRepository.findById(userId);
+        log.info("user{}",user.toString());
+        List<Board> boards = user.get().getBoard();
+        List<GetPostDto> getPostDtos = new ArrayList<>();
+
+        for (Board board : boards) {
+            GetPostDto getPostDto = new GetPostDto();
+            getPostDto.setComment(board.getComment());
+            getPostDto.setContents(board.getContents());
+            getPostDto.setPhoto(board.getPhoto());
+            getPostDtos.add(getPostDto);
+        }
+        return getPostDtos;
+
+
+    }
 
 }

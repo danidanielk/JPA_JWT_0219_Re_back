@@ -10,10 +10,15 @@ import lombok.Setter;
 @NoArgsConstructor
 public class HomeDto {
 
+
+
     private String email;
     private String name;
     private String nickname;
     private String profile;
+    private String introduce;
     private String photo;
+    private Long boardid;
+    private Long userid;
 
 }

@@ -41,7 +41,8 @@ public class TestController {
     }
 
     @GetMapping("/select")
-    public ResponseEntity testDto (@RequestParam("departmentname") String departmentName){
+    public ResponseEntity testDto (){
+        String departmentName = "good";
         List<Member> members =memberRepository.findAll();
         List<TestDto> testDtos = new ArrayList<>();
         for (Member member : members) {

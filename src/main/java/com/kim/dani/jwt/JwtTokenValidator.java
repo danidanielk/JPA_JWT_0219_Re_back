@@ -35,7 +35,11 @@ public class JwtTokenValidator {
                 System.out.println(token+"%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
                 Claims claims = Jwts.parser()
                         .setSigningKey(secret)
-                        .parseClaimsJws(token).getBody();
+                        .parseClaimsJws(token)
+                        .getBody();
+
+
+
                 if (claims != null){
                     String email = (String) claims.get("email");
                     return email;

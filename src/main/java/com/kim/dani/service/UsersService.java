@@ -1,28 +1,47 @@
 package com.kim.dani.service;
 
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.kim.dani.dto.HomeDto;
 import com.kim.dani.dto.JoinDto;
 import com.kim.dani.dto.LoginDto;
 import com.kim.dani.entity.Users;
 import com.kim.dani.jwt.JwtTokenProvider;
+import com.kim.dani.jwt.JwtTokenValidator;
 import com.kim.dani.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import net.bytebuddy.implementation.bytecode.Throw;
 import org.apache.catalina.User;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class UsersService {
 
+
+
+    @Value("${cloud.aws.s3.bucket.name}")
+    private String bucket;
+
+    @Value("${cloud.aws.region.static}")
+    private String region;
+
+
     private final UsersRepository usersRepository;
     private final JwtTokenProvider jwtTokenProvider;
-
+    private final JwtTokenValidator jwtTokenValidator;
+    private final AmazonS3Client amazonS3Client;
     public Users join(JoinDto joinDto){
 
         List<Users> users= usersRepository.findAll();
@@ -63,5 +82,48 @@ public class UsersService {
         }else{
             return null;
         }
+    }
+
+
+
+    public Users profileUpdate(MultipartFile file,HomeDto homeDtos,
+                               HttpServletRequest req) throws IOException {
+
+
+            String userEmail = jwtTokenValidator.jwtGetUserEmail(req);
+            if (userEmail !=null){
+                String path = file.getOriginalFilename();
+                UUID uuid = UUID.randomUUID();
+                String key = "uploads/"+path+uuid;
+                String allPath = "https://"+bucket +".s3."+ region + ".amazonaws.com/" + key;
+                ObjectMetadata metadata = new ObjectMetadata();
+                metadata.setContentLength(file.getSize());
+                metadata.setContentType(file.getContentType());
+                amazonS3Client.putObject(bucket, key, file.getInputStream(), metadata);
+                Users users = usersRepository.findByemail(userEmail);
+                users.setNickname(homeDtos.getNickname());
+                users.setProfile(allPath);
+                users.setIntroduce(homeDtos.getIntroduce());
+                usersRepository.save(users);
+                return users;
+            }
+            return null;
+    }
+
+
+    public HomeDto getProfile(HttpServletRequest req){
+
+        String userEmail = jwtTokenValidator.jwtGetUserEmail(req);
+        if(userEmail != null){
+            Users user = usersRepository.findByemail(userEmail);
+            if(user != null){
+                HomeDto homeDto = new HomeDto();
+                homeDto.setNickname(user.getNickname());
+                homeDto.setProfile(user.getProfile());
+                homeDto.setIntroduce(user.getIntroduce());
+                return homeDto;
+            }
+        }
+        return null;
     }
 }

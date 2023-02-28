@@ -23,6 +23,7 @@ public class JwtTokenProvider {
         Date now = new Date(System.currentTimeMillis());
         Date expiryDate = new Date(System.currentTimeMillis()+60*30000);
 
+
         return Jwts.builder()
                 .setSubject(email)
                 .setIssuedAt(now)

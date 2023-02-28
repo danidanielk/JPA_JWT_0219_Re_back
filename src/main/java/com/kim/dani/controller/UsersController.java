@@ -1,6 +1,7 @@
 package com.kim.dani.controller;
 
 
+import com.kim.dani.dto.HomeDto;
 import com.kim.dani.dto.JoinDto;
 import com.kim.dani.dto.LoginDto;
 import com.kim.dani.entity.Users;
@@ -16,9 +17,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.io.IOException;
+import java.util.List;
 
 @RestController
 @Slf4j
@@ -37,6 +42,8 @@ public class UsersController {
 @Value("${cloud.aws.credentials.secret-key}")
 private String key;
 
+
+    //Token Test
     @GetMapping("/validation")
     public String test2(HttpServletRequest req){
 
@@ -44,6 +51,8 @@ private String key;
         return email;
     }
 
+
+    //회원가입
     @PostMapping("/join")
     public ResponseEntity join(@Valid @RequestBody JoinDto joinDto) {
         Users user = usersService.join(joinDto);
@@ -51,12 +60,12 @@ private String key;
             return new ResponseEntity(user, HttpStatus.OK);
         }
         return new ResponseEntity("Email 중복 409",HttpStatus.CONFLICT);
-//        throw new RuntimeException("Email 중복");
     }
 
+
+    //로그인
     @PostMapping("/login")
     public ResponseEntity login(@Valid @RequestBody LoginDto loginDto,HttpServletResponse res){
-
 
         String result = usersService.login(loginDto, res);
         if(result != null){
@@ -64,13 +73,29 @@ private String key;
         }else {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         }
-
     }
 
 
-    @GetMapping("/test")
-    public String test1() {
-  return key;
-
+    //프로필 업데이트
+    @PatchMapping("/profileupdate")
+    public ResponseEntity profileUpdate(@RequestPart("profile") MultipartFile file ,@RequestPart("homeDto") HomeDto homeDtos, HttpServletRequest req) throws IOException {
+        Users user = usersService.profileUpdate(file, homeDtos, req);
+      if( user != null){
+            return new ResponseEntity(user, HttpStatus.OK);
+      }
+        return new ResponseEntity("error~!", HttpStatus.BAD_REQUEST);
     }
+
+
+    //프로필 셀렉트
+    @GetMapping("/getprofile")
+    public ResponseEntity getProfile(HttpServletRequest req){
+        HomeDto homeDto = usersService.getProfile(req);
+        if(homeDto != null){
+            return new ResponseEntity(homeDto, HttpStatus.OK);
+        }
+        return new ResponseEntity("error~!", HttpStatus.NOT_FOUND);
+    }
+
+
 }

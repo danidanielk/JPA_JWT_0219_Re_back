@@ -2,6 +2,8 @@ package com.kim.dani.controller;
 
 
 import com.kim.dani.dto.BoardUploadDto;
+import com.kim.dani.dto.GetAllBoardDto;
+import com.kim.dani.dto.GetPostDto;
 import com.kim.dani.dto.HomeDto;
 import com.kim.dani.service.BoardService;
 import lombok.NoArgsConstructor;
@@ -29,7 +31,7 @@ public class BoardController {
     private final BoardService boardService;
 
 
-    //local Post Upload
+    //로컬에 저장 테스트
     @PostMapping("/upload")
     public ResponseEntity Upload(@RequestParam("file") MultipartFile file,
                                  @RequestParam("title") String title,
@@ -43,7 +45,7 @@ public class BoardController {
     }
 
 
-    //local Post Upload Test
+    //로컬에 이미지 저장 테스트
     @PostMapping("/uploadtest")
     public ResponseEntity postUploadTest(@RequestParam("file") MultipartFile file) throws IOException {
        String name = file.getOriginalFilename();
@@ -51,17 +53,17 @@ public class BoardController {
     }
 
 
-    //Return Post Paht
+    //홈 화면 유저별 전체 이미지
     @GetMapping("/home")
     public ResponseEntity home(HttpServletRequest req){
         List<HomeDto> homeDtos = boardService.getBoard(req);
-//        if (homeDtos != null){
+        if (homeDtos != null){
             return new ResponseEntity(homeDtos,HttpStatus.OK);
-//        }
-//        return new ResponseEntity("어디서난 에러지",HttpStatus.CONFLICT);
+        }
+        return new ResponseEntity("어디서난 에러지",HttpStatus.CONFLICT);
     }
 
-    //S3 Photo Upload Test
+    //S3 이미지 업로드 테스트
     @PostMapping("/PhotoUpload")
     public ResponseEntity photoUploadTest (@RequestParam("file") MultipartFile file,
                                            @RequestParam("title") String title,
@@ -73,7 +75,7 @@ public class BoardController {
     }
 
 
-    //S3 Post Upload
+    //S3 포스트 업로드
     @PostMapping("/PostUpload")
     public ResponseEntity postUpload (@RequestParam("file") MultipartFile file,
                                       @RequestParam("title") String title,
@@ -87,7 +89,25 @@ public class BoardController {
     }
 
 
+    //모든 사진 가져오기
+    @GetMapping("/getallboard")
+    public ResponseEntity getAllBoard (){
+       List<GetAllBoardDto> allBoardDtos = boardService.getAllBoard();
+       if (allBoardDtos!= null){
+           return new ResponseEntity(allBoardDtos, HttpStatus.OK);
+       }
+        return new ResponseEntity("error~!", HttpStatus.NOT_FOUND);
+    }
 
+    //사진 클릭시 포스트화면
+    @GetMapping("/getpost")
+    public ResponseEntity getPost(@RequestParam("userid") Long userId,@RequestParam("boardid")Long boardId){
+       List<GetPostDto> getPostDtos =  boardService.getPost(userId,boardId);
+       if (getPostDtos != null){
+           return new ResponseEntity(getPostDtos, HttpStatus.OK);
+       }
+        return new ResponseEntity("error~!", HttpStatus.NOT_FOUND);
+    }
 
 
 }
