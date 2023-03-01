@@ -88,14 +88,28 @@ private String key;
 
 
     //프로필 셀렉트
-    @GetMapping("/getprofile")
-    public ResponseEntity getProfile(HttpServletRequest req){
-        HomeDto homeDto = usersService.getProfile(req);
+    @GetMapping("/getprofile/{userid}")
+//    public ResponseEntity getProfile(@RequestParam("userid") Long userid, HttpServletRequest req){
+    public ResponseEntity getProfile(@PathVariable Long userid){
+        HomeDto homeDto = usersService.getProfile( userid);
         if(homeDto != null){
             return new ResponseEntity(homeDto, HttpStatus.OK);
         }
         return new ResponseEntity("error~!", HttpStatus.NOT_FOUND);
     }
+
+
+    //myHome 프로필
+    @GetMapping("/getmyprofile")
+    public ResponseEntity getMyProfile(HttpServletRequest req){
+        HomeDto homeDto = usersService.getMyProfile(req);
+        if(homeDto != null){
+            return new ResponseEntity(homeDto, HttpStatus.OK);
+        }
+        return new ResponseEntity("error~!", HttpStatus.NOT_FOUND);
+    }
+
+
 
 
 }

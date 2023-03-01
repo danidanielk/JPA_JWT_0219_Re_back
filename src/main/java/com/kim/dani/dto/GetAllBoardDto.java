@@ -11,7 +11,7 @@ import lombok.Setter;
 public class GetAllBoardDto {
 
     private String photo;
-    private Long UserId;
+    private Long userId;
     private Long boardId;
 
 }

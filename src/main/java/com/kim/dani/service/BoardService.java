@@ -38,20 +38,19 @@ public class BoardService {
     private String region;
 
 
-
     private final BoardRepository boardRepository;
     private final JwtTokenValidator jwtTokenValidator;
     private final UsersRepository usersRepository;
     private final AmazonS3Client amazonS3Client;
 
 
-    public boolean Upload (MultipartFile file, String title, String content, HttpServletRequest req) throws IOException {
+    public boolean Upload(MultipartFile file, String title, String content, HttpServletRequest req) throws IOException {
 
         String userEmail = jwtTokenValidator.jwtGetUserEmail(req);
-        if(userEmail !=null){
+        if (userEmail != null) {
             Users user = usersRepository.findByemail(userEmail);
-            UUID uuid= UUID.randomUUID();
-            String lastPath = "C:/file/"+uuid+file.getOriginalFilename();
+            UUID uuid = UUID.randomUUID();
+            String lastPath = "C:/file/" + uuid + file.getOriginalFilename();
             Path path = Paths.get(lastPath);
             file.transferTo(path);
 
@@ -68,24 +67,23 @@ public class BoardService {
     }
 
 
-
-    public List<HomeDto> getBoard(HttpServletRequest req){
+    public List<HomeDto> getMyBoard(HttpServletRequest req) {
         String userEmail = jwtTokenValidator.jwtGetUserEmail(req);
-        if (userEmail !=null){
-            List<Board> boards= boardRepository.findAll();
-            List<HomeDto> homeDtos =  new ArrayList<>();
+        if (userEmail != null) {
+            List<Board> boards = boardRepository.findAll();
+            List<HomeDto> homeDtos = new ArrayList<>();
             for (Board board : boards) {
-               if(board.getUsers().getEmail().equals(userEmail)){
-                  HomeDto homeDto= new HomeDto();
-                        homeDto.setUserid(board.getUsers().getId());
-                        homeDto.setBoardid(board.getId());
-                       homeDto.setPhoto(board.getPhoto());
-                       homeDto.setName(board.getUsers().getName());
-                       homeDto.setProfile(board.getUsers().getProfile());
-                       homeDto.setEmail(board.getUsers().getEmail());
-                       homeDto.setNickname(board.getUsers().getNickname());
-                       homeDtos.add(homeDto);
-               }
+                if (board.getUsers().getEmail().equals(userEmail)) {
+                    HomeDto homeDto = new HomeDto();
+                    homeDto.setUserId(board.getUsers().getId());
+                    homeDto.setBoardId(board.getId());
+                    homeDto.setPhoto(board.getPhoto());
+                    homeDto.setName(board.getUsers().getName());
+                    homeDto.setProfile(board.getUsers().getProfile());
+                    homeDto.setEmail(board.getUsers().getEmail());
+                    homeDto.setNickname(board.getUsers().getNickname());
+                    homeDtos.add(homeDto);
+                }
             }
             return homeDtos;
         }
@@ -94,7 +92,37 @@ public class BoardService {
 
 
 
-    public String  photoUpload(MultipartFile file) {
+    public List<HomeDto> getBoard(Long userId) {
+        Optional<Users> user = usersRepository.findById(userId);
+        if(user.isPresent()){
+            String userEmail = user.get().getEmail();
+        if (userEmail != null) {
+            List<Board> boards = boardRepository.findAll();
+            List<HomeDto> homeDtos = new ArrayList<>();
+            for (Board board : boards) {
+                if (board.getUsers().getEmail().equals(userEmail)) {
+                    HomeDto homeDto = new HomeDto();
+                    homeDto.setUserId(board.getUsers().getId());
+                    homeDto.setBoardId(board.getId());
+                    homeDto.setPhoto(board.getPhoto());
+                    homeDto.setName(board.getUsers().getName());
+                    homeDto.setProfile(board.getUsers().getProfile());
+                    homeDto.setEmail(board.getUsers().getEmail());
+                    homeDto.setNickname(board.getUsers().getNickname());
+                    homeDtos.add(homeDto);
+                }
+            }
+            return homeDtos;
+        }
+        }
+        return null;
+    }
+
+
+
+
+
+    public String photoUpload(MultipartFile file) {
 
         try {
             //이름 가져와서
@@ -102,9 +130,9 @@ public class BoardService {
             //이름에 추가할 uuid 만들고
             UUID uuid = UUID.randomUUID();
             //폴더 만들어주고 폭더/이름 의 path 를 만들어준다.
-            String key = "uploads/"+path+uuid;
+            String key = "uploads/" + path + uuid;
             //S3 에서 나오는 url 과 똑같이 만들어서 반환하려고 만들었다.. 이렇게하는게 맞는지 모르겠다.
-            String allPath = "https://"+bucket +".s3."+ region + ".amazonaws.com/" + key;
+            String allPath = "https://" + bucket + ".s3." + region + ".amazonaws.com/" + key;
             //메타데이타 만들어주고 파일 사이즈와 컨텐츠타입을 정의해준다. 컨텐츠타입 안넣으면 url클릭시 download 된다.
             ObjectMetadata metadata = new ObjectMetadata();
             metadata.setContentLength(file.getSize());
@@ -118,13 +146,12 @@ public class BoardService {
     }
 
 
-
-    public boolean postUpload(MultipartFile file,String title,String content,HttpServletRequest req){
+    public boolean postUpload(MultipartFile file, String title, String content, HttpServletRequest req) {
 
         String email = jwtTokenValidator.jwtGetUserEmail(req);
-        if (email != null){
+        if (email != null) {
             Users user = usersRepository.findByemail(email);
-            String path  = photoUpload(file);
+            String path = photoUpload(file);
             usersRepository.save(user);
             Board board = new Board();
             board.setPhoto(path);
@@ -138,39 +165,68 @@ public class BoardService {
     }
 
 
-
-    public List<GetAllBoardDto> getAllBoard(){
-        List<Board> board = boardRepository.findAll();
-        if (board !=null) {
-            List<GetAllBoardDto> getAllBoardDtos = new ArrayList<>();
-            for (Board boards : board) {
-                GetAllBoardDto getAllBoardDto = new GetAllBoardDto();
-                getAllBoardDto.setPhoto(boards.getPhoto());
-                getAllBoardDto.setBoardId(boards.getId());
-                getAllBoardDto.setUserId(boards.getUsers().getId());
-                getAllBoardDtos.add(getAllBoardDto);
+    public List<GetAllBoardDto> getAllBoard(String search) {
+        if(search != null){
+            Users user = usersRepository.findByemail(search);
+            List<Board> board = user.getBoard();
+            if(board != null){
+                List<GetAllBoardDto> allBoardDtos = new ArrayList<>();
+                for (Board board1 : board) {
+                    GetAllBoardDto getAllBoardDto = new GetAllBoardDto();
+                    getAllBoardDto.setPhoto(board1.getPhoto());
+                    getAllBoardDto.setBoardId(board1.getId());
+                    getAllBoardDto.setUserId(user.getId());
+                    allBoardDtos.add(getAllBoardDto);
+                }
+                return allBoardDtos;
             }
-            return getAllBoardDtos;
+        }
+            List<Board> board = boardRepository.findAll();
+            if (board != null) {
+                List<GetAllBoardDto> getAllBoardDtos = new ArrayList<>();
+                for (Board boards : board) {
+                    GetAllBoardDto getAllBoardDto = new GetAllBoardDto();
+                    getAllBoardDto.setPhoto(boards.getPhoto());
+                    getAllBoardDto.setBoardId(boards.getId());
+                    getAllBoardDto.setUserId(boards.getUsers().getId());
+                    getAllBoardDtos.add(getAllBoardDto);
+                }
+                return getAllBoardDtos;
+
         }
         return null;
+    }
+
+
+    public GetPostDto getPost(Long userId, Long boardId,String comment) {
+        if(comment != null){
+
         }
 
-    public List<GetPostDto> getPost(Long userId,Long boardId){
+
         Optional<Users> user = usersRepository.findById(userId);
-        log.info("user{}",user.toString());
-        List<Board> boards = user.get().getBoard();
-        List<GetPostDto> getPostDtos = new ArrayList<>();
+//        log.info("user{}", user.toString());
+        String userEmail = user.get().getEmail();
+        if (user.isPresent()){
+            List<Board> boards = user.get().getBoard();
+            for (Board board : boards) {
+                if (board.getId() == boardId) {
+                    GetPostDto getPostDto = new GetPostDto();
+                    getPostDto.setPhoto(board.getPhoto());
+                    getPostDto.setContents(board.getContents());
+                    getPostDto.setComment(board.getComment());
+                getPostDto.setEmail(userEmail);
+                    return getPostDto;
+                }
+            }
 
-        for (Board board : boards) {
-            GetPostDto getPostDto = new GetPostDto();
-            getPostDto.setComment(board.getComment());
-            getPostDto.setContents(board.getContents());
-            getPostDto.setPhoto(board.getPhoto());
-            getPostDtos.add(getPostDto);
         }
-        return getPostDtos;
+        return null;
 
 
     }
+
+
+
 
 }

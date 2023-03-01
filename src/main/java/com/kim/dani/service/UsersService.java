@@ -111,19 +111,36 @@ public class UsersService {
     }
 
 
-    public HomeDto getProfile(HttpServletRequest req){
-
-        String userEmail = jwtTokenValidator.jwtGetUserEmail(req);
-        if(userEmail != null){
-            Users user = usersRepository.findByemail(userEmail);
-            if(user != null){
+    public HomeDto getProfile(Long userid){
+        if(userid != null){
+            Optional<Users> user = usersRepository.findById(userid);
+            if(user.isPresent()){
                 HomeDto homeDto = new HomeDto();
-                homeDto.setNickname(user.getNickname());
-                homeDto.setProfile(user.getProfile());
-                homeDto.setIntroduce(user.getIntroduce());
+                homeDto.setNickname(user.get().getNickname());
+                homeDto.setProfile(user.get().getProfile());
+                homeDto.setIntroduce(user.get().getIntroduce());
                 return homeDto;
             }
         }
+
+        return null;
+
+    }
+
+
+    public HomeDto getMyProfile(HttpServletRequest req){
+        String userEmail = jwtTokenValidator.jwtGetUserEmail(req);
+        if(userEmail != null){
+            Users user2 = usersRepository.findByemail(userEmail);
+            if(user2 != null){
+                HomeDto homeDto = new HomeDto();
+                homeDto.setNickname(user2.getNickname());
+                homeDto.setProfile(user2.getProfile());
+                homeDto.setIntroduce(user2.getIntroduce());
+                return homeDto;
+            }
+        }
+
         return null;
     }
 }

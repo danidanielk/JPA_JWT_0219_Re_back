@@ -17,4 +17,5 @@ public class GetPostDto {
    private List<Comment> comment;
    private String photo;
    private String contents;
+   private String email;
 }

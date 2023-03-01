@@ -53,15 +53,30 @@ public class BoardController {
     }
 
 
-    //홈 화면 유저별 전체 이미지
-    @GetMapping("/home")
-    public ResponseEntity home(HttpServletRequest req){
-        List<HomeDto> homeDtos = boardService.getBoard(req);
+    //홈 화면 로그인유저
+    @GetMapping("/myhome")
+    public ResponseEntity Myhome(HttpServletRequest req){
+        List<HomeDto> homeDtos = boardService.getMyBoard(req);
         if (homeDtos != null){
             return new ResponseEntity(homeDtos,HttpStatus.OK);
         }
         return new ResponseEntity("어디서난 에러지",HttpStatus.CONFLICT);
     }
+
+
+    // 홈화면 유저별
+    @GetMapping("/home/{userid}")
+    public ResponseEntity home(@PathVariable Long userid){
+        List<HomeDto> homeDtos = boardService.getBoard(userid);
+        if (homeDtos != null){
+            return new ResponseEntity(homeDtos,HttpStatus.OK);
+        }
+        return new ResponseEntity("어디서난 에러지",HttpStatus.CONFLICT);
+    }
+
+
+
+
 
     //S3 이미지 업로드 테스트
     @PostMapping("/PhotoUpload")
@@ -89,10 +104,10 @@ public class BoardController {
     }
 
 
-    //모든 사진 가져오기
-    @GetMapping("/getallboard")
-    public ResponseEntity getAllBoard (){
-       List<GetAllBoardDto> allBoardDtos = boardService.getAllBoard();
+    //검색화면 모든 사진 가져오기
+    @PostMapping("/getallboard")
+    public ResponseEntity getAllBoard (@RequestParam(value = "search",required = false) String search){
+       List<GetAllBoardDto> allBoardDtos = boardService.getAllBoard(search);
        if (allBoardDtos!= null){
            return new ResponseEntity(allBoardDtos, HttpStatus.OK);
        }
@@ -101,10 +116,12 @@ public class BoardController {
 
     //사진 클릭시 포스트화면
     @GetMapping("/getpost")
-    public ResponseEntity getPost(@RequestParam("userid") Long userId,@RequestParam("boardid")Long boardId){
-       List<GetPostDto> getPostDtos =  boardService.getPost(userId,boardId);
-       if (getPostDtos != null){
-           return new ResponseEntity(getPostDtos, HttpStatus.OK);
+    public ResponseEntity getPost(@RequestParam("userid") Long userId,
+                                  @RequestParam("boardid")Long boardId,
+                                  @RequestParam(value = "comment",required = false) String comment){
+       GetPostDto getPostDto =  boardService.getPost(userId,boardId,comment);
+       if (getPostDto != null){
+           return new ResponseEntity(getPostDto, HttpStatus.OK);
        }
         return new ResponseEntity("error~!", HttpStatus.NOT_FOUND);
     }

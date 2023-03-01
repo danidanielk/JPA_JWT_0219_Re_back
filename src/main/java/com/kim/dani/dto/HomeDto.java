@@ -18,7 +18,7 @@ public class HomeDto {
     private String profile;
     private String introduce;
     private String photo;
-    private Long boardid;
-    private Long userid;
+    private Long boardId;
+    private Long userId;
 
 }
