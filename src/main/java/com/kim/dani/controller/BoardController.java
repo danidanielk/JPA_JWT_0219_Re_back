@@ -117,13 +117,24 @@ public class BoardController {
     //사진 클릭시 포스트화면
     @GetMapping("/getpost")
     public ResponseEntity getPost(@RequestParam("userid") Long userId,
-                                  @RequestParam("boardid")Long boardId,
-                                  @RequestParam(value = "comment",required = false) String comment){
-       GetPostDto getPostDto =  boardService.getPost(userId,boardId,comment);
+                                  @RequestParam("boardid")Long boardId
+                                  ){
+       GetPostDto getPostDto =  boardService.getPost(userId,boardId);
        if (getPostDto != null){
            return new ResponseEntity(getPostDto, HttpStatus.OK);
        }
         return new ResponseEntity("error~!", HttpStatus.NOT_FOUND);
+    }
+
+    @PostMapping("/comment")
+    public ResponseEntity comment(@RequestParam("comment") String comment,
+                                  @RequestParam("userid") Long userId,
+                                  @RequestParam("boardid") Long boardId){
+        boolean getComment = boardService.comment(comment,userId,boardId);
+        if (getComment){
+            return new ResponseEntity(HttpStatus.OK);
+        }
+        return new ResponseEntity(HttpStatus.BAD_REQUEST);
     }
 
 

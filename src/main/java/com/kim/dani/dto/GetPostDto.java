@@ -14,7 +14,7 @@ import java.util.List;
 public class GetPostDto {
 
 
-   private List<Comment> comment;
+   private List<Comment> comments;
    private String photo;
    private String contents;
    private String email;

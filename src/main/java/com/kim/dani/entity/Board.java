@@ -20,7 +20,7 @@ public class Board {
     @Column(nullable = true)
     private String title;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String photo;
 
     @Column(nullable = true)

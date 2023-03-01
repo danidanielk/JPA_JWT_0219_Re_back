@@ -6,9 +6,11 @@ import com.kim.dani.dto.GetAllBoardDto;
 import com.kim.dani.dto.GetPostDto;
 import com.kim.dani.dto.HomeDto;
 import com.kim.dani.entity.Board;
+import com.kim.dani.entity.Comment;
 import com.kim.dani.entity.Users;
 import com.kim.dani.jwt.JwtTokenValidator;
 import com.kim.dani.repository.BoardRepository;
+import com.kim.dani.repository.CommentRepository;
 import com.kim.dani.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +44,7 @@ public class BoardService {
     private final JwtTokenValidator jwtTokenValidator;
     private final UsersRepository usersRepository;
     private final AmazonS3Client amazonS3Client;
+    private final CommentRepository commentRepository;
 
 
     public boolean Upload(MultipartFile file, String title, String content, HttpServletRequest req) throws IOException {
@@ -197,15 +200,29 @@ public class BoardService {
         return null;
     }
 
-
-    public GetPostDto getPost(Long userId, Long boardId,String comment) {
-        if(comment != null){
-
-        }
-
-
+public boolean comment(String comment,Long userId,Long boardId) {
+    if (comment != null) {
         Optional<Users> user = usersRepository.findById(userId);
-//        log.info("user{}", user.toString());
+        Optional<Board> board = boardRepository.findById(boardId);
+        if (user.isPresent() && board.isPresent()) {
+            Users getUser = user.get();
+            Board getBoard = board.get();
+            Comment getComment = new Comment();
+            getComment.setComment(comment);
+            getComment.setUsers(getUser);
+            getComment.setBoard(getBoard);
+            usersRepository.save(getUser);
+            boardRepository.save(getBoard);
+            commentRepository.save(getComment);
+            return true;
+        }
+    }
+    return false;
+
+}
+
+    public GetPostDto getPost (Long userId, Long boardId) {
+        Optional<Users> user = usersRepository.findById(userId);
         String userEmail = user.get().getEmail();
         if (user.isPresent()){
             List<Board> boards = user.get().getBoard();
@@ -214,12 +231,11 @@ public class BoardService {
                     GetPostDto getPostDto = new GetPostDto();
                     getPostDto.setPhoto(board.getPhoto());
                     getPostDto.setContents(board.getContents());
-                    getPostDto.setComment(board.getComment());
-                getPostDto.setEmail(userEmail);
+                    getPostDto.setComments(board.getComment());
+                    getPostDto.setEmail(userEmail);
                     return getPostDto;
                 }
             }
-
         }
         return null;
 
