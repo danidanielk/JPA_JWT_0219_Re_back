@@ -1,5 +1,8 @@
 package com.kim.dani.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Type;
@@ -26,12 +29,14 @@ public class Board {
     @Column(nullable = true)
     private String contents;
 
+    @JsonBackReference
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL,orphanRemoval = true)
     private List<Comment> comment = new ArrayList<>();
 
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL,orphanRemoval = true)
     private List<LikeYou> likeyou = new ArrayList<>();
 
+    @JsonManagedReference
     @ManyToOne
     @JoinColumn(name = "users_id")
     Users users;

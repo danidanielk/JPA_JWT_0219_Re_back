@@ -5,6 +5,7 @@ import com.kim.dani.dto.BoardUploadDto;
 import com.kim.dani.dto.GetAllBoardDto;
 import com.kim.dani.dto.GetPostDto;
 import com.kim.dani.dto.HomeDto;
+import com.kim.dani.jwt.JwtTokenValidator;
 import com.kim.dani.service.BoardService;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ import java.util.UUID;
 public class BoardController {
 
     private final BoardService boardService;
+    private final JwtTokenValidator jwtTokenValidator;
 
 
     //로컬에 저장 테스트
@@ -117,9 +119,10 @@ public class BoardController {
     //사진 클릭시 포스트화면
     @GetMapping("/getpost")
     public ResponseEntity getPost(@RequestParam("userid") Long userId,
-                                  @RequestParam("boardid")Long boardId
+                                  @RequestParam("boardid")Long boardId,
+                                  HttpServletRequest req
                                   ){
-       GetPostDto getPostDto =  boardService.getPost(userId,boardId);
+       GetPostDto getPostDto =  boardService.getPost(userId,boardId,req);
        if (getPostDto != null){
            return new ResponseEntity(getPostDto, HttpStatus.OK);
        }
@@ -129,8 +132,10 @@ public class BoardController {
     @PostMapping("/comment")
     public ResponseEntity comment(@RequestParam("comment") String comment,
                                   @RequestParam("userid") Long userId,
-                                  @RequestParam("boardid") Long boardId){
-        boolean getComment = boardService.comment(comment,userId,boardId);
+                                  @RequestParam("boardid") Long boardId,
+                                  HttpServletRequest req)
+                                    {
+        boolean getComment = boardService.comment(comment,userId,boardId,req);
         if (getComment){
             return new ResponseEntity(HttpStatus.OK);
         }

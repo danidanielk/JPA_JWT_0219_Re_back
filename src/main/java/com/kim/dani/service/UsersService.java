@@ -119,6 +119,8 @@ public class UsersService {
                 homeDto.setNickname(user.get().getNickname());
                 homeDto.setProfile(user.get().getProfile());
                 homeDto.setIntroduce(user.get().getIntroduce());
+                int boardCount = user.get().getBoard().size();
+                homeDto.setBoardCount(boardCount);
                 return homeDto;
             }
         }
@@ -130,6 +132,7 @@ public class UsersService {
 
     public HomeDto getMyProfile(HttpServletRequest req){
         String userEmail = jwtTokenValidator.jwtGetUserEmail(req);
+        System.out.println(userEmail+"7777777777777777777777777777777777777777777777777777777777777777777");
         if(userEmail != null){
             Users user2 = usersRepository.findByemail(userEmail);
             if(user2 != null){
@@ -137,6 +140,8 @@ public class UsersService {
                 homeDto.setNickname(user2.getNickname());
                 homeDto.setProfile(user2.getProfile());
                 homeDto.setIntroduce(user2.getIntroduce());
+                int boardCount = user2.getBoard().size();
+                homeDto.setBoardCount(boardCount);
                 return homeDto;
             }
         }

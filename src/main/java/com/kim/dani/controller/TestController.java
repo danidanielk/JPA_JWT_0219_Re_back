@@ -5,6 +5,7 @@ import com.kim.dani.dto.TestDto;
 import com.kim.dani.dto.TestSaveDto;
 import com.kim.dani.entity.Department;
 import com.kim.dani.entity.Member;
+import com.kim.dani.jwt.JwtTokenValidator;
 import com.kim.dani.repository.DepartmentRepository;
 import com.kim.dani.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +26,7 @@ public class TestController {
 
     private final MemberRepository memberRepository;
     private final DepartmentRepository departmentRepository;
-
+    private final JwtTokenValidator jwtTokenValidator;
 
 
     @PostMapping("/save")
@@ -56,5 +58,12 @@ public class TestController {
         return new ResponseEntity(testDtos, HttpStatus.OK);
     }
 
+
+
+@PostMapping("/v")
+    public void vv(HttpServletRequest req){
+        String emaile = jwtTokenValidator.jwtGetUserEmail(req);
+    System.out.println(emaile);
+}
 
 }

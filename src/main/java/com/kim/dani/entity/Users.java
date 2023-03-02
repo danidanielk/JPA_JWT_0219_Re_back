@@ -1,5 +1,6 @@
 package com.kim.dani.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -37,9 +38,11 @@ public class Users {
     @Column(nullable = true)
     private String nickname;
 
+    @JsonBackReference
     @OneToMany(mappedBy = "users" , cascade = CascadeType.ALL,orphanRemoval = true)
     private List<Board> board = new ArrayList<>();
 
+    @JsonBackReference
     @OneToMany(mappedBy = "users", cascade = CascadeType.ALL,orphanRemoval = true)
     private List<Comment> comment = new ArrayList<>();
 

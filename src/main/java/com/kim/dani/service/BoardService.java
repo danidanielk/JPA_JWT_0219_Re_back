@@ -22,10 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -152,6 +149,7 @@ public class BoardService {
     public boolean postUpload(MultipartFile file, String title, String content, HttpServletRequest req) {
 
         String email = jwtTokenValidator.jwtGetUserEmail(req);
+        System.out.println(email+"33333333333333333333333333333333333333333333333");
         if (email != null) {
             Users user = usersRepository.findByemail(email);
             String path = photoUpload(file);
@@ -200,12 +198,19 @@ public class BoardService {
         return null;
     }
 
-public boolean comment(String comment,Long userId,Long boardId) {
+
+public boolean comment(String comment,Long userId,Long boardId,HttpServletRequest req) {
+
+
+    String email = jwtTokenValidator.jwtGetUserEmail(req);
     if (comment != null) {
+        String userEmail = jwtTokenValidator.jwtGetUserEmail(req);
         Optional<Users> user = usersRepository.findById(userId);
         Optional<Board> board = boardRepository.findById(boardId);
         if (user.isPresent() && board.isPresent()) {
-            Users getUser = user.get();
+
+            Users getUser = usersRepository.findByemail(userEmail);
+//            Users getUser = user.get();
             Board getBoard = board.get();
             Comment getComment = new Comment();
             getComment.setComment(comment);
@@ -221,7 +226,9 @@ public boolean comment(String comment,Long userId,Long boardId) {
 
 }
 
-    public GetPostDto getPost (Long userId, Long boardId) {
+    public GetPostDto getPost (Long userId, Long boardId,HttpServletRequest req) {
+//        Optional<Board> board3 = boardRepository.findById(boardId);
+//        List<Comment> comment1 = board.get().getComment();
         Optional<Users> user = usersRepository.findById(userId);
         String userEmail = user.get().getEmail();
         if (user.isPresent()){
@@ -233,16 +240,20 @@ public boolean comment(String comment,Long userId,Long boardId) {
                     getPostDto.setContents(board.getContents());
                     getPostDto.setComments(board.getComment());
                     getPostDto.setEmail(userEmail);
-                    return getPostDto;
+                    List<String> commentList= new ArrayList<>();
+                    getPostDto.setCommentList(commentList);
+                    List<Comment> com = board.getComment();
+                    for (Comment comment : com) {
+                        String getComment = comment.getComment();
+                        String getUserEmail = comment.getUsers().getEmail();
+                        String emailPlusComment = getUserEmail + " : " + getComment;
+                        commentList.add(emailPlusComment);
+                    }
+        return getPostDto;
                 }
-            }
+          }
         }
-        return null;
-
+                return null;
 
     }
-
-
-
-
 }

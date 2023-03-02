@@ -20,5 +20,6 @@ public class HomeDto {
     private String photo;
     private Long boardId;
     private Long userId;
+    private int boardCount;
 
 }

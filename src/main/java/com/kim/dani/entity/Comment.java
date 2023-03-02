@@ -1,5 +1,6 @@
 package com.kim.dani.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,10 +17,13 @@ public class Comment {
     @Column(nullable = false)
     private String comment;
 
+    @JsonManagedReference
     @ManyToOne
     @JoinColumn(name = "users_id")
     Users users;
 
+
+    @JsonManagedReference
     @ManyToOne
     @JoinColumn(name = "board_id")
     Board board;
